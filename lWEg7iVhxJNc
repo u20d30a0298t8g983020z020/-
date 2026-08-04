@@ -1,189 +1,403 @@
 warn(">!<")
 
+local Players = cloneref(game:GetService("Players"))
+local MemoryStoreService = game:GetService("MemoryStoreService")
+local Player = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Players             = cloneref(game:GetService("Players")) or game:GetService("Players")
-local ReplicatedStorage   = cloneref(game:GetService("ReplicatedStorage")) or game:GetService("ReplicatedStorage")
-local MemoryStoreService  = cloneref(game:GetService("MemoryStoreService")) or game:GetService("MemoryStoreService")
-local Workspace           = game:GetService("Workspace")
-
-local Client = Players.LocalPlayer
-local genv   = getgenv()
-
-genv.Hyphon_2102     = filtergc("function", { StartLine = 2102, IgnoreExecutor = true }, true)
-genv.Hyphon_2247     = filtergc("function", { StartLine = 2247, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
-genv.Hyphon_2846     = filtergc("function", { StartLine = 2846, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
-genv.Hyphon_fake_dec = filtergc("function", { StartLine = 1097, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
-genv.Hyphon_Encode   = debug.getupvalue(genv.Hyphon_2102, 1)
-genv.Hyphon_Decode   = debug.getupvalue(genv.Hyphon_2102, 21)
-genv.Hyphon_Script   = nil
-
-for _, Object in pairs(getnilinstances()) do
-    if Object:IsA("Script") and Object.Name:len() == 32 then
-        genv.Hyphon_Script = Object
-        break
+local function safeGet(tbl, ...)
+    local keys = { ... }
+    local current = tbl
+    for _, key in ipairs(keys) do
+        if current == nil then return nil end
+        if type(current) ~= "table" then return nil end
+        current = current[key]
     end
+    return current
 end
 
-if not genv.Hyphon_2247     then Client:Kick("Emulator - Hyphon_2247 not found!")     task.wait(9e9) end
-if not genv.Hyphon_2846     then Client:Kick("Emulator - Hyphon_2846 not found!")     task.wait(9e9) end
-if not genv.Hyphon_fake_dec then Client:Kick("Emulator - Hyphon_fake_dec not found!") task.wait(9e9) end
-if not genv.Hyphon_Script   then Client:Kick("Emulator - Hyphon_Script not found!")   task.wait(9e9) end
+function Hyphon_Emulator()
+    local Emulation_SET = false
 
-local Emulator_Data = {
-    Emulator_Set = false,
-    Hyphon_Check = {
-        ["Tick"]              = nil,
-        ["Hyphon_Check"]      = MemoryStoreService:FindFirstChild("Hyphon_Check"),
-        ["Handshake_Version"] = tostring(debug.getupvalue(genv.Hyphon_2846, 42)) .. "Handshake_V5",
-    },
-    RemoteFunction = {
-        ["Tick"]           = nil,
-        ["RemoteFunction"] = debug.getupvalue(genv.Hyphon_2247, 6),
-        ["Token One"]      = nil,
-        ["Token Two"]      = nil,
-        ["Current Number"] = nil,
-        ["Token Three"]    = nil,
-        ["Token Four"]     = nil,
-        ["Tablets"]        = {[1]=nil,[2]=nil,[3]=nil,[4]=nil,[5]=nil,[6]=nil},
-        ["SSL"]            = nil,
-        ["LuaFunction"]    = nil,
-    },
-}
+    local OWpCsbCTXfeDG = filtergc('function', { IgnoreExecutor = true, Name = "OWpCsbCTXfeDG" }, true)
 
-local Hyphon_Check = nil
-Hyphon_Check = hookfunction(Emulator_Data.Hyphon_Check["Hyphon_Check"].FireServer, newcclosure(function(self, ...)
-    Emulator_Data.Hyphon_Check["Tick"] = tick()
-    return Hyphon_Check(self, ...)
-end))
-
-local RemoteFunction = nil
-RemoteFunction = hookfunction(Emulator_Data.RemoteFunction["RemoteFunction"].InvokeServer, newcclosure(function(self, ...)
-    local Arguments = table.pack(...)
-    Emulator_Data.RemoteFunction["Tick"] = tick()
-    if not Emulator_Data.Emulator_Set and type(Arguments[1]) == "table" and Arguments[1][1] ~= nil then
-        Emulator_Data.RemoteFunction["Token One"]      = Arguments[1][1]
-        Emulator_Data.RemoteFunction["Token Two"]      = Arguments[1][2]
-        Emulator_Data.RemoteFunction["Current Number"] = genv.Hyphon_Decode(Arguments[1][4])
-        Emulator_Data.RemoteFunction["Token Three"]    = Arguments[1][6]
-        Emulator_Data.RemoteFunction["Token Four"]     = Arguments[1][11]
-        if type(Arguments[1][12]) == "table" and Arguments[1][12]["Tablets"] ~= nil then
-            Emulator_Data.RemoteFunction["Tablets"] = Arguments[1][12]["Tablets"]
-        end
-        if type(Arguments[1][13]) == "table" then
-            Emulator_Data.RemoteFunction["SSL"]         = Arguments[1][13]["SSL"]
-            Emulator_Data.RemoteFunction["LuaFunction"] = Arguments[1][13]["LuaFunction"]
-        end
+    warn("found OWpCsbCTXfeDG")
+    if not OWpCsbCTXfeDG then
+        return
     end
-    return RemoteFunction(self, ...)
-end))
 
-repeat task.wait() until (Emulator_Data.Hyphon_Check["Tick"] and Emulator_Data.RemoteFunction["Tick"])
+    local source = debug.info(OWpCsbCTXfeDG, "s")
 
-genv.Emulator_Set = true
-
-local OldBit32 = nil
-OldBit32 = hookfunction(bit32.bxor, newcclosure(function(...)
-    if not checkcaller() then
-        if getcallingscript() == genv.Hyphon_Script then
-            return task.wait(9e9)
-        end
-    end
-    return OldBit32(...)
-end))
-
-pcall(function()
     local Wrapped_Functions = filtergc("function", {
-        Upvalues  = {"Attempted function hijacking detected. Logged."},
-        Constants = {":P"}
+        Constants = { "__tostring", "__call", "rawget", ":P" },
+        Upvalues = { "Attempted function hijacking detected. Logged." },
+        IgnoreExecutor = true
     })
-    for _, Function in pairs(Wrapped_Functions) do
-        local Upvalues = debug.getupvalues(Wrapped_Functions)
-        if #Upvalues == 20 then
-            for _, Upvalue in pairs(Upvalues) do
-                if typeof(Upvalue) == "function" and islclosure(Upvalue) then
-                    Upvalues = debug.getupvalues(Upvalue)
-                    if #Upvalues == 17 then
-                        hookfunction(Function, newcclosure(function() end))
-                    end
+    local DetectionFunction = nil
+
+    for Index, Function in pairs(Wrapped_Functions) do
+        local Upvalues = debug.getupvalues(Function)
+        for Index, Upvalue in pairs(Upvalues) do
+            if (typeof(Upvalue) == "function" and islclosure(Upvalue)) then
+                Upvalues = debug.getupvalues(Upvalue)
+                if (#Upvalues == 17) then
+                    DetectionFunction = Function
                 end
             end
         end
     end
-end)
 
-task.spawn(function() while task.wait(9)  do Emulator_Data.RemoteFunction["Tablets"][1] = tick() Emulator_Data.RemoteFunction["Tablets"][2] = tick() end end)
-task.spawn(function() while task.wait(10) do Emulator_Data.RemoteFunction["Tablets"][3] = tick() end end)
-task.spawn(function() while task.wait(4)  do Emulator_Data.RemoteFunction["Tablets"][4] = tick() end end)
+    if not (DetectionFunction) then
+        Player:Kick("Detection function not found!")
+        task.wait(9e9)
+    end
 
-for _, Object in pairs(ReplicatedStorage:GetChildren()) do
-    if Object:IsA("Folder") and Object.Name:len() <= 4 then
-        local RF = Object:FindFirstChildOfClass("RemoteFunction")
-        RF.OnClientInvoke = function(...)
-            local Arguments = table.pack(...)
-            if Arguments[1] ~= nil then
-                Emulator_Data.RemoteFunction["Token Two"] = genv.Hyphon_Decode(Arguments[1])
+    local OldHookfunction = nil
+    OldHookfunction = hookfunction(DetectionFunction, function() end)
+
+    local OnClientInvoke_Hyphon = filtergc("function", {
+        StartLine = 2102,
+        IgnoreExecutor = true
+    }, true)
+    local InvokeServer_Hyphon = filtergc("function", {
+        StartLine = 2247,
+        Source = debug.info(OnClientInvoke_Hyphon, "s"),
+        IgnoreExecutor = true
+    }, true)
+
+    local HandshakeVersion_Holder = filtergc("function", {
+        Source = source,
+        IgnoreExecutor = true
+    }, true)
+
+
+    local Fake_Dec = filtergc("function", {
+        StartLine = 1097,
+        Source = debug.info(OnClientInvoke_Hyphon, "s"),
+        IgnoreExecutor = true
+    }, true)
+
+    if not (OnClientInvoke_Hyphon) then
+        Player:Kick("OnClientInvoke function not found!")
+        task.wait(9e9)
+    end
+    local Important_Function = filtergc("function", {
+        StartLine = 456,
+        Source = debug.info(OnClientInvoke_Hyphon, "s"),
+        IgnoreExecutor = true
+    }, true)
+    if not (InvokeServer_Hyphon) then
+        Player:Kick("InvokeServer function not found!")
+        task.wait(9e9)
+    end
+    if not (HandshakeVersion_Holder) then
+        Player:Kick("Hyphon_Check function not found!")
+        task.wait(9e9)
+    end
+    if not (Fake_Dec) then
+        Player:Kick("fake_dec function not found!")
+        task.wait(9e9)
+    end
+    if not (Important_Function) then
+        Player:Kick("fake_dec function not found!")
+        task.wait(9e9)
+    end
+
+    local Hyphon_Encode = debug.getupvalue(OnClientInvoke_Hyphon, 1)
+    local Hyphon_Decode = debug.getupvalue(OnClientInvoke_Hyphon, 21)
+
+    local Hyphon_Script = nil
+    local Hyphon_Check = MemoryStoreService:FindFirstChild("Hyphon_Check")
+
+    -- FALLBACK jika Hyphon_Check tidak ditemukan
+    if not Hyphon_Check then
+        warn("Hyphon_Check not found in MemoryStoreService, searching elsewhere...")
+        for _, v in pairs(getgc(true)) do
+            if type(v) == "table" and rawget(v, "FireServer") then
+                local check = rawget(v, "Name")
+                if check == "Hyphon_Check" then
+                    Hyphon_Check = v
+                    break
+                end
             end
-            Emulator_Data.RemoteFunction["Current Number"] = -1
-            local Table = {
-                debug.getupvalue(genv.Hyphon_2102, 26),
-                genv.Hyphon_Encode("Hyphon-," .. tostring(math.random(242, 789) .. "{ Date (Data: " .. tostring(math.random(1, 9)) .. ")")),
-                genv.Hyphon_fake_dec(Arguments[3], tostring(Client.UserId)),
-                debug.getupvalue(genv.Hyphon_2102, 29)(),
-                genv.Hyphon_Encode(tostring(Workspace:GetServerTimeNow())),
-                {
-                    CI = genv.Hyphon_Encode(tostring(tick())),
-                    TL = Emulator_Data.RemoteFunction["Tablets"],
-                    LS = #tostring(debug.getupvalue(genv.Hyphon_2102, 37)) + game.PlaceVersion
-                }
-            }
-            return table.unpack(Table)
         end
     end
+
+    local Hyphon_CheckTick = nil
+    local HandshakeVersion = tostring(debug.getupvalue(HandshakeVersion_Holder, 5)) .. "Handshake_V5"
+    local RemoteFunction = debug.getupvalue(InvokeServer_Hyphon, 6)
+    local RemoteFunctionTick = nil
+    local InvokeServer_Data = {
+        TokenOne = nil,
+        TokenTwo = nil,
+        CurrentNumber = nil,
+        TokenThree = nil,
+        TenthArgTable = nil,
+        TokenFour = nil,
+        Tablets = nil,
+        SSL = nil,
+        LuaFunction = nil,
+        ChangeDebounce = nil,
+    }
+
+    for Index, Object in pairs(getnilinstances()) do
+        if (Object:IsA("Script") and Object.Name:len() == 32) then
+            Hyphon_Script = Object
+        end
+    end
+
+    if not (Hyphon_Script) then
+        Player:Kick("Hyphon Script not found!")
+        task.wait(9e9)
+    end
+
+    -- HOOK FIRESERVER DENGAN NIL CHECK
+    local Old_Fireserver = nil
+    if Hyphon_Check then
+        Old_Fireserver = hookfunction(Hyphon_Check.FireServer, newcclosure(function(self, ...)
+            Hyphon_CheckTick = tick()
+            return Old_Fireserver(self, ...)
+        end))
+    else
+        warn("Hyphon_Check is nil, skipping FireServer hook")
+        Hyphon_CheckTick = tick()
+    end
+
+    -- HOOK INVOKESERVER DENGAN NIL CHECK LENGKAP
+    local Old_InvokeServer = nil
+    Old_InvokeServer = hookfunction(RemoteFunction.InvokeServer, newcclosure(function(self, ...)
+        if (Emulation_SET ~= true) then
+            local Arguments = table.pack(...)
+            RemoteFunctionTick = tick()
+
+            -- NIL CHECK UNTUK SETIAP AKSES
+            if Arguments and Arguments[1] and type(Arguments[1]) == "table" then
+                local arg1 = Arguments[1]
+
+                InvokeServer_Data.TokenOne = arg1[1] or "fallback"
+                InvokeServer_Data.TokenTwo = arg1[2] or "fallback"
+
+                if arg1[4] then
+                    pcall(function()
+                        InvokeServer_Data.CurrentNumber = Hyphon_Decode(arg1[4])
+                    end)
+                else
+                    InvokeServer_Data.CurrentNumber = "0"
+                end
+
+                InvokeServer_Data.TokenThree = arg1[6] or "fallback"
+                InvokeServer_Data.TenthArgTable = arg1[10] or {}
+                InvokeServer_Data.TokenFour = arg1[11] or "fallback"
+
+                if arg1[12] and type(arg1[12]) == "table" then
+                    InvokeServer_Data.Tablets = arg1[12]["Tablets"] or {}
+                else
+                    InvokeServer_Data.Tablets = {}
+                end
+
+                if arg1[13] and type(arg1[13]) == "table" then
+                    InvokeServer_Data.SSL = arg1[13]["SSL"] or 0
+                    InvokeServer_Data.LuaFunction = arg1[13]["LuaFunction"] or {}
+                else
+                    InvokeServer_Data.SSL = 0
+                    InvokeServer_Data.LuaFunction = {}
+                end
+            else
+                -- FALLBACK jika Arguments invalid
+                RemoteFunctionTick = tick()
+                InvokeServer_Data.TokenOne = "fallback"
+                InvokeServer_Data.TokenTwo = "fallback"
+                InvokeServer_Data.CurrentNumber = "0"
+                InvokeServer_Data.TokenThree = "fallback"
+                InvokeServer_Data.TenthArgTable = {}
+                InvokeServer_Data.TokenFour = "fallback"
+                InvokeServer_Data.Tablets = {}
+                InvokeServer_Data.SSL = 0
+                InvokeServer_Data.LuaFunction = {}
+            end
+        end
+        return Old_InvokeServer(self, ...)
+    end))
+    setstackhidden(RemoteFunction.InvokeServer, true)
+
+    -- WAIT SAMPAI KEDUANYA READY
+    local waitCount = 0
+    while (not Hyphon_CheckTick or not RemoteFunctionTick) and waitCount < 100 do
+        task.wait(0.1)
+        waitCount = waitCount + 1
+        if not Hyphon_CheckTick then
+            Hyphon_CheckTick = tick() -- fallback
+        end
+        if not RemoteFunctionTick then
+            RemoteFunctionTick = tick() -- fallback
+        end
+    end
+
+    InvokeServer_Data.ChangeDebounce = debug.getupvalue(OnClientInvoke_Hyphon, 4)
+    Emulation_SET = true
+
+    local OldBit32 = nil
+    OldBit32 = hookfunction(bit32.bxor, function(...)
+        if not (checkcaller()) and getcallingscript() == Hyphon_Script then
+            return task.wait(9e9)
+        end
+        return OldBit32(...)
+    end)
+
+    task.spawn(function()
+        while task.wait(10) do
+            if InvokeServer_Data.Tablets then
+                InvokeServer_Data.Tablets[3] = tick()
+            end
+        end
+    end)
+    task.spawn(function()
+        while task.wait(4) do
+            if InvokeServer_Data.Tablets then
+                InvokeServer_Data.Tablets[4] = tick()
+            end
+        end
+    end)
+
+    -- FIND REMOTE FUNCTION DI REPLICATEDSTORAGE
+    for Index, Object in pairs(ReplicatedStorage:GetChildren()) do
+        if (Object.Name:len() > 4) then
+            continue
+        end
+        if not (Object:IsA("Folder")) then
+            continue
+        end
+        local RemoteFunction = Object:FindFirstChildOfClass("RemoteFunction")
+        if RemoteFunction then
+            RemoteFunction["OnClientInvoke"] = function(Arg1, Arg2, Arg3, Arg4)
+                InvokeServer_Data.CurrentNumber = -1
+                if Arg1 then
+                    pcall(function()
+                        InvokeServer_Data.TokenTwo = Hyphon_Decode(Arg1)
+                    end)
+                end
+                local Table = {
+                    debug.getupvalue(OnClientInvoke_Hyphon, 26) or "fallback",
+                    Hyphon_Encode("Hyphon-," ..
+                        tostring(math.random(242, 789)) .. "{ Date (Data: " .. tostring(math.random(1, 9)) .. ")"),
+                    pcall(function() return Fake_Dec(Arg3, tostring(Player.UserId)) end) and
+                    Fake_Dec(Arg3, tostring(Player.UserId)) or "fallback",
+                    debug.getupvalue(OnClientInvoke_Hyphon, 29)() or 0,
+                    Hyphon_Encode(tostring(workspace:GetServerTimeNow())),
+                    {
+                        CI = Hyphon_Encode(tostring(tick())),
+                        TL = InvokeServer_Data.Tablets or {},
+                        GL = nil,
+                        LS = 3 + game.PlaceVersion
+                    }
+                }
+                return Table
+            end
+        end
+    end
+
+    -- INVOKESERVER LOOP DENGAN NIL CHECK
+    task.spawn(function()
+        local InvokeServer = function()
+            if not RemoteFunction then return end
+            if not InvokeServer_Data.TokenOne or not InvokeServer_Data.TokenTwo then
+                return
+            end
+
+            InvokeServer_Data.CurrentNumber = (InvokeServer_Data.CurrentNumber or 0) + 1
+            if InvokeServer_Data.Tablets then
+                InvokeServer_Data.Tablets[5] = tick() - 0.5
+                InvokeServer_Data.Tablets[6] = tick()
+            end
+
+            pcall(function()
+                RemoteFunction:InvokeServer({
+                    InvokeServer_Data.TokenOne or "fallback",
+                    InvokeServer_Data.TokenTwo or "fallback",
+                    nil,
+                    [4] = Hyphon_Encode(tostring(InvokeServer_Data.CurrentNumber or 0)),
+                    [5] = debug.getupvalue(InvokeServer_Hyphon, 12)("_1") .. "__index",
+                    [6] = InvokeServer_Data.TokenThree or "fallback",
+                    [7] = "Hooked",
+                    [8] = Hyphon_Encode(tostring(os.time())),
+                    [9] = tick(),
+                    [10] = InvokeServer_Data.TenthArgTable or {},
+                    [11] = InvokeServer_Data.TokenFour or "fallback",
+                    [12] = {
+                        ["CurrentTick"] = Hyphon_Encode(tostring(tick())),
+                        ["Tablets"] = InvokeServer_Data.Tablets or {}
+                    },
+                    [13] = {
+                        ["Metatable code"] = Hyphon_Encode("nil"),
+                        ["SSL"] = InvokeServer_Data.SSL or 0,
+                        ["LuaFunction"] = InvokeServer_Data.LuaFunction or {}
+                    }
+                })
+            end)
+        end
+
+        local waitTime = 35 - (tick() - (RemoteFunctionTick or tick()))
+        if waitTime > 0 then
+            task.wait(waitTime)
+        end
+        InvokeServer()
+
+        while task.wait(35) do
+            InvokeServer()
+        end
+    end)
+
+    -- FIRESERVER LOOP DENGAN NIL CHECK
+    task.spawn(function()
+        local FireServer = function()
+            if not Hyphon_Check then return end
+            if InvokeServer_Data.Tablets then
+                InvokeServer_Data.Tablets[1] = tick()
+                InvokeServer_Data.Tablets[2] = tick() + .5
+            end
+            pcall(function()
+                Hyphon_Check:FireServer(tick(), HandshakeVersion or "V5Handshake_V5")
+            end)
+            task.wait(.1)
+            pcall(function()
+                Hyphon_Check:FireServer()
+            end)
+        end
+
+        local waitTime = 9 - (tick() - (Hyphon_CheckTick or tick()))
+        if waitTime > 0 then
+            task.wait(waitTime)
+        end
+        FireServer()
+
+        while task.wait(9) do
+            FireServer()
+        end
+    end)
+
+    HyphonReady = true
 end
 
-task.spawn(function()
-    local function DoRemoteFunction()
-        local RF = Emulator_Data.RemoteFunction["RemoteFunction"]
-        Emulator_Data.RemoteFunction["Current Number"] += 1
-        Emulator_Data.RemoteFunction["Tablets"][5] = (tick() - .5)
-        Emulator_Data.RemoteFunction["Tablets"][6] = tick()
-        RF:InvokeServer({
-            Emulator_Data.RemoteFunction["Token One"],
-            Emulator_Data.RemoteFunction["Token Two"],
-            nil,
-            [4]  = genv.Hyphon_Encode(tostring(Emulator_Data.RemoteFunction["Current Number"])),
-            [5]  = debug.getupvalue(genv.Hyphon_2247, 12)("_1") .. "__index",
-            [6]  = Emulator_Data.RemoteFunction["Token Three"],
-            [7]  = debug.getupvalue(genv.Hyphon_2247, 20),
-            [8]  = genv.Hyphon_Encode(tostring(os.time())),
-            [9]  = tick(),
-            [10] = debug.getupvalue(genv.Hyphon_2247, 23)[debug.getupvalue(genv.Hyphon_2247, 24)],
-            [11] = Emulator_Data.RemoteFunction["Token Four"],
-            [12] = { ["CurrentTick"] = genv.Hyphon_Encode(tostring(tick())), ["Tablets"] = Emulator_Data.RemoteFunction["Tablets"] },
-            [13] = { ["LuaFunction"] = Emulator_Data.RemoteFunction["LuaFunction"], ["SSL"] = Emulator_Data.RemoteFunction["SSL"], ["Metatable code"] = genv.Hyphon_Encode("nil") },
-        })
-    end
-    task.wait(35 - (tick() - Emulator_Data.RemoteFunction["Tick"]))
-    while true do task.spawn(DoRemoteFunction) task.wait(35) end
-end)
+-- JALANKAN EMULATOR
+pcall(Hyphon_Emulator)
 
-task.spawn(function()
-    local function DoHyphonCheck()
-        local HC = Emulator_Data.Hyphon_Check["Hyphon_Check"]
-        local HV = Emulator_Data.Hyphon_Check["Handshake_Version"]
-        HC:FireServer(tick(), HV)
-        task.wait(.1)
-        HC:FireServer()
-    end
-    task.wait(9 - (tick() - Emulator_Data.Hyphon_Check["Tick"]))
-    while true do task.spawn(DoHyphonCheck) task.wait(9) end
-end)
+-- TUNGGU SAMPAI READY
+local waitCount = 0
+while not HyphonReady and waitCount < 100 do
+    task.wait(0.1)
+    waitCount = waitCount + 1
+end
 
-genv.HyphonReady = true  
-repeat task.wait() until HyphonReady == true
+-- service
+local Services = setmetatable({}, {
+    __index = function(self, service)
+        return cloneref(game:GetService(service))
+    end
+})
+
+print("loaded")
 
 print("<!!>")
-task.wait(1)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
