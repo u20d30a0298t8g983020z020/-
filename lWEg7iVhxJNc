@@ -1,11 +1,189 @@
 warn(">!<")
 
+
+local Players             = cloneref(game:GetService("Players")) or game:GetService("Players")
+local ReplicatedStorage   = cloneref(game:GetService("ReplicatedStorage")) or game:GetService("ReplicatedStorage")
+local MemoryStoreService  = cloneref(game:GetService("MemoryStoreService")) or game:GetService("MemoryStoreService")
+local Workspace           = game:GetService("Workspace")
+
+local Client = Players.LocalPlayer
+local genv   = getgenv()
+
+genv.Hyphon_2102     = filtergc("function", { StartLine = 2102, IgnoreExecutor = true }, true)
+genv.Hyphon_2247     = filtergc("function", { StartLine = 2247, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
+genv.Hyphon_2846     = filtergc("function", { StartLine = 2846, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
+genv.Hyphon_fake_dec = filtergc("function", { StartLine = 1097, Source = debug.info(genv.Hyphon_2102, "s"), IgnoreExecutor = true }, true)
+genv.Hyphon_Encode   = debug.getupvalue(genv.Hyphon_2102, 1)
+genv.Hyphon_Decode   = debug.getupvalue(genv.Hyphon_2102, 21)
+genv.Hyphon_Script   = nil
+
+for _, Object in pairs(getnilinstances()) do
+    if Object:IsA("Script") and Object.Name:len() == 32 then
+        genv.Hyphon_Script = Object
+        break
+    end
+end
+
+if not genv.Hyphon_2247     then Client:Kick("Emulator - Hyphon_2247 not found!")     task.wait(9e9) end
+if not genv.Hyphon_2846     then Client:Kick("Emulator - Hyphon_2846 not found!")     task.wait(9e9) end
+if not genv.Hyphon_fake_dec then Client:Kick("Emulator - Hyphon_fake_dec not found!") task.wait(9e9) end
+if not genv.Hyphon_Script   then Client:Kick("Emulator - Hyphon_Script not found!")   task.wait(9e9) end
+
+local Emulator_Data = {
+    Emulator_Set = false,
+    Hyphon_Check = {
+        ["Tick"]              = nil,
+        ["Hyphon_Check"]      = MemoryStoreService:FindFirstChild("Hyphon_Check"),
+        ["Handshake_Version"] = tostring(debug.getupvalue(genv.Hyphon_2846, 42)) .. "Handshake_V5",
+    },
+    RemoteFunction = {
+        ["Tick"]           = nil,
+        ["RemoteFunction"] = debug.getupvalue(genv.Hyphon_2247, 6),
+        ["Token One"]      = nil,
+        ["Token Two"]      = nil,
+        ["Current Number"] = nil,
+        ["Token Three"]    = nil,
+        ["Token Four"]     = nil,
+        ["Tablets"]        = {[1]=nil,[2]=nil,[3]=nil,[4]=nil,[5]=nil,[6]=nil},
+        ["SSL"]            = nil,
+        ["LuaFunction"]    = nil,
+    },
+}
+
+local Hyphon_Check = nil
+Hyphon_Check = hookfunction(Emulator_Data.Hyphon_Check["Hyphon_Check"].FireServer, newcclosure(function(self, ...)
+    Emulator_Data.Hyphon_Check["Tick"] = tick()
+    return Hyphon_Check(self, ...)
+end))
+
+local RemoteFunction = nil
+RemoteFunction = hookfunction(Emulator_Data.RemoteFunction["RemoteFunction"].InvokeServer, newcclosure(function(self, ...)
+    local Arguments = table.pack(...)
+    Emulator_Data.RemoteFunction["Tick"] = tick()
+    if not Emulator_Data.Emulator_Set and type(Arguments[1]) == "table" and Arguments[1][1] ~= nil then
+        Emulator_Data.RemoteFunction["Token One"]      = Arguments[1][1]
+        Emulator_Data.RemoteFunction["Token Two"]      = Arguments[1][2]
+        Emulator_Data.RemoteFunction["Current Number"] = genv.Hyphon_Decode(Arguments[1][4])
+        Emulator_Data.RemoteFunction["Token Three"]    = Arguments[1][6]
+        Emulator_Data.RemoteFunction["Token Four"]     = Arguments[1][11]
+        if type(Arguments[1][12]) == "table" and Arguments[1][12]["Tablets"] ~= nil then
+            Emulator_Data.RemoteFunction["Tablets"] = Arguments[1][12]["Tablets"]
+        end
+        if type(Arguments[1][13]) == "table" then
+            Emulator_Data.RemoteFunction["SSL"]         = Arguments[1][13]["SSL"]
+            Emulator_Data.RemoteFunction["LuaFunction"] = Arguments[1][13]["LuaFunction"]
+        end
+    end
+    return RemoteFunction(self, ...)
+end))
+
+repeat task.wait() until (Emulator_Data.Hyphon_Check["Tick"] and Emulator_Data.RemoteFunction["Tick"])
+
+genv.Emulator_Set = true
+
+local OldBit32 = nil
+OldBit32 = hookfunction(bit32.bxor, newcclosure(function(...)
+    if not checkcaller() then
+        if getcallingscript() == genv.Hyphon_Script then
+            return task.wait(9e9)
+        end
+    end
+    return OldBit32(...)
+end))
+
 pcall(function()
-    loadstring(game:HttpGet("https://pastefy.app/yXiVEzTW/raw"))()
-    repeat task.wait() until HyphonReady == true
+    local Wrapped_Functions = filtergc("function", {
+        Upvalues  = {"Attempted function hijacking detected. Logged."},
+        Constants = {":P"}
+    })
+    for _, Function in pairs(Wrapped_Functions) do
+        local Upvalues = debug.getupvalues(Wrapped_Functions)
+        if #Upvalues == 20 then
+            for _, Upvalue in pairs(Upvalues) do
+                if typeof(Upvalue) == "function" and islclosure(Upvalue) then
+                    Upvalues = debug.getupvalues(Upvalue)
+                    if #Upvalues == 17 then
+                        hookfunction(Function, newcclosure(function() end))
+                    end
+                end
+            end
+        end
+    end
 end)
 
+task.spawn(function() while task.wait(9)  do Emulator_Data.RemoteFunction["Tablets"][1] = tick() Emulator_Data.RemoteFunction["Tablets"][2] = tick() end end)
+task.spawn(function() while task.wait(10) do Emulator_Data.RemoteFunction["Tablets"][3] = tick() end end)
+task.spawn(function() while task.wait(4)  do Emulator_Data.RemoteFunction["Tablets"][4] = tick() end end)
+
+for _, Object in pairs(ReplicatedStorage:GetChildren()) do
+    if Object:IsA("Folder") and Object.Name:len() <= 4 then
+        local RF = Object:FindFirstChildOfClass("RemoteFunction")
+        RF.OnClientInvoke = function(...)
+            local Arguments = table.pack(...)
+            if Arguments[1] ~= nil then
+                Emulator_Data.RemoteFunction["Token Two"] = genv.Hyphon_Decode(Arguments[1])
+            end
+            Emulator_Data.RemoteFunction["Current Number"] = -1
+            local Table = {
+                debug.getupvalue(genv.Hyphon_2102, 26),
+                genv.Hyphon_Encode("Hyphon-," .. tostring(math.random(242, 789) .. "{ Date (Data: " .. tostring(math.random(1, 9)) .. ")")),
+                genv.Hyphon_fake_dec(Arguments[3], tostring(Client.UserId)),
+                debug.getupvalue(genv.Hyphon_2102, 29)(),
+                genv.Hyphon_Encode(tostring(Workspace:GetServerTimeNow())),
+                {
+                    CI = genv.Hyphon_Encode(tostring(tick())),
+                    TL = Emulator_Data.RemoteFunction["Tablets"],
+                    LS = #tostring(debug.getupvalue(genv.Hyphon_2102, 37)) + game.PlaceVersion
+                }
+            }
+            return table.unpack(Table)
+        end
+    end
+end
+
+task.spawn(function()
+    local function DoRemoteFunction()
+        local RF = Emulator_Data.RemoteFunction["RemoteFunction"]
+        Emulator_Data.RemoteFunction["Current Number"] += 1
+        Emulator_Data.RemoteFunction["Tablets"][5] = (tick() - .5)
+        Emulator_Data.RemoteFunction["Tablets"][6] = tick()
+        RF:InvokeServer({
+            Emulator_Data.RemoteFunction["Token One"],
+            Emulator_Data.RemoteFunction["Token Two"],
+            nil,
+            [4]  = genv.Hyphon_Encode(tostring(Emulator_Data.RemoteFunction["Current Number"])),
+            [5]  = debug.getupvalue(genv.Hyphon_2247, 12)("_1") .. "__index",
+            [6]  = Emulator_Data.RemoteFunction["Token Three"],
+            [7]  = debug.getupvalue(genv.Hyphon_2247, 20),
+            [8]  = genv.Hyphon_Encode(tostring(os.time())),
+            [9]  = tick(),
+            [10] = debug.getupvalue(genv.Hyphon_2247, 23)[debug.getupvalue(genv.Hyphon_2247, 24)],
+            [11] = Emulator_Data.RemoteFunction["Token Four"],
+            [12] = { ["CurrentTick"] = genv.Hyphon_Encode(tostring(tick())), ["Tablets"] = Emulator_Data.RemoteFunction["Tablets"] },
+            [13] = { ["LuaFunction"] = Emulator_Data.RemoteFunction["LuaFunction"], ["SSL"] = Emulator_Data.RemoteFunction["SSL"], ["Metatable code"] = genv.Hyphon_Encode("nil") },
+        })
+    end
+    task.wait(35 - (tick() - Emulator_Data.RemoteFunction["Tick"]))
+    while true do task.spawn(DoRemoteFunction) task.wait(35) end
+end)
+
+task.spawn(function()
+    local function DoHyphonCheck()
+        local HC = Emulator_Data.Hyphon_Check["Hyphon_Check"]
+        local HV = Emulator_Data.Hyphon_Check["Handshake_Version"]
+        HC:FireServer(tick(), HV)
+        task.wait(.1)
+        HC:FireServer()
+    end
+    task.wait(9 - (tick() - Emulator_Data.Hyphon_Check["Tick"]))
+    while true do task.spawn(DoHyphonCheck) task.wait(9) end
+end)
+
+genv.HyphonReady = true  
+repeat task.wait() until HyphonReady == true
+
 print("<!!>")
+task.wait(1)
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
